@@ -36,6 +36,7 @@ class SignUpPage extends GetWidget<AuthController> {
               const SizedBox(height: 30,),
               TextFormField(
                 controller: passwordController,
+                obscureText: true,
                 decoration: const InputDecoration(
                     hintText: "Password"
                 ),
@@ -44,7 +45,7 @@ class SignUpPage extends GetWidget<AuthController> {
               ElevatedButton(
                 child: const Text("Sign Up"),
                 onPressed: (){
-
+                  controller.signUp(nameController.text.trim(), emailController.text.trim(), passwordController.text);
                 },
               ),
             ],
