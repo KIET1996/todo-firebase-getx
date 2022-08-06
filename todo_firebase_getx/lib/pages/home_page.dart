@@ -14,6 +14,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _todoController = TextEditingController();
   AuthController controller = Get.put(AuthController());
+  bool isDark = false;
 
   @override
   Widget build(BuildContext context) {
@@ -35,67 +36,59 @@ class _HomePageState extends State<HomePage> {
         ),
         centerTitle: true,
         actions: [
-          IconButton(
-              onPressed: (){
+          PopupMenuButton(
+            onSelected: (item) {
+              print("item selected ${item}");
+              if(item == "logout"){
                 controller.signOut();
-              },
-              icon: const Icon(Icons.logout)
-          ),
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              if (Get.isDarkMode) {
-                Get.changeTheme(ThemeData.light());
-              } else {
-                Get.changeTheme(ThemeData.dark());
+              }
+              if(item == "darkmode"){
+                if (Get.isDarkMode) {
+                  setState(() {
+                    isDark = false;
+                  });
+                  Get.changeTheme(ThemeData.light());
+                } else {
+                  setState(() {
+                    isDark = true;
+                  });
+                  Get.changeTheme(ThemeData.dark());
+                }
               }
             },
-          )
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              child: Icon(Icons.settings),
+            ),
+            itemBuilder: (BuildContext bc) {
+              return [
+                PopupMenuItem(
+                  value: "darkmode",
+                  child: Row(
+                      children: [
+                        Icon((!isDark ? Icons.dark_mode : Icons.light_mode), color: Colors.grey,),
+                        const SizedBox(width: 8.0,),
+                        Text((!isDark ? "Dark" : "Light"), style: TextStyle(fontSize: 16, color: Colors.grey),),                    ]
+                  ),
+                ),
+                PopupMenuItem(
+                  value: "logout",
+                  child: Row(
+                      children: const[
+                        Icon(Icons.logout, color: Colors.grey,),
+                        SizedBox(width: 8.0,),
+                        Text("Logout", style: TextStyle(fontSize: 16, color: Colors.grey),),                    ]
+                  ),
+                ),
+              ];
+            },
+          ),
         ],
       ),
       body: Column(
         children: <Widget>[
           const SizedBox(
             height: 20,
-          ),
-          const Text(
-            "Add Todo Here:",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Card(
-            margin: const EdgeInsets.all(20),
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _todoController,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () {
-                      if (_todoController.text != "") {
-                        Database()
-                            .addTodo(_todoController.text, controller.userInfo!.uid);
-                        _todoController.clear();
-                      }
-                    },
-                  )
-                ],
-              ),
-            ),
-          ),
-          const Text(
-            "Your Todos",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
           ),
           GetX<TodoController>(
             init: Get.put<TodoController>(TodoController()),
@@ -119,7 +112,6 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.amber,
         child: const Icon(Icons.add),
         onPressed: (){
           showDialog(
@@ -128,7 +120,7 @@ class _HomePageState extends State<HomePage> {
               return AlertDialog(
                 shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10)),
-                  title: const Center(child: Text("Add Todo")),
+                  title: const Center(child: Text("New Task")),
                   content: Container(
                     width: 400,
                     height: 100,
@@ -145,7 +137,10 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
-                    child: const Text("Close")
+                    child: const Text("Close"),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.redAccent,
+                    ),
                   ),
                   ElevatedButton(
                       onPressed: () {
@@ -156,7 +151,7 @@ class _HomePageState extends State<HomePage> {
                         }
                         Navigator.of(context).pop();
                       },
-                      child: const Text("Add")
+                      child: const Text("Save")
                   ),
                 ],
               );
